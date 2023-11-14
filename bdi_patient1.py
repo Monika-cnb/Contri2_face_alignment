@@ -2,16 +2,13 @@
 
 import dlib
 import cv2
-# import imageio
-# import os
-# import subprocess
 import pandas as pd
-# import numpy as np
+
 
 # define path for the video files
 initial_data_path = "./../../timo/datasets/AV/BDI/"
 
-# Defining folders which we use for extracting openface values
+# Defining folders which we use for finding video files
 training_data_path = initial_data_path + "Compressed/Patients/"
 
 # path for saving the aligned files
@@ -19,7 +16,7 @@ output_dir = "./../../Desktop/Contri_2_updated/0_face_alignment/"
 output_dir_path_train = output_dir + "0_aligned_dataset/0_bdi/0_patient1/"
 # code to read the patient dataframe
 patient_df = pd.read_csv(output_dir + "0_aligned_dataset/0_bdi/Patient_file_details.csv")
-print(patient_df)
+# print(patient_df)
 
 error_files = []
 video_num = 0
@@ -52,6 +49,8 @@ for val in range(len(patient_df)):
         start_frame = total_seconds * fps
         print(fps)
         print(start_frame)
+        # if we haven't reached the actual interview location, skip the frames
+        cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
 
         # Variable to count frame - to start after the interview location
         frame_count = -1
@@ -66,13 +65,6 @@ for val in range(len(patient_df)):
         # out = cv2.VideoWriter('output.avi', -1, 20.0, (640,480))
         left, right, top, bottom = 0, 0, 0, 0
         while cap.isOpened():
-            frame_count += 1
-            # if we haven't reached the actual interview location, skip the frames
-            if frame_count < start_frame:
-                print(frame_count)
-                continue
-            print("Actually reading the frame")
-
             ret, frame = cap.read()
             if not ret:
                 break
@@ -93,14 +85,18 @@ for val in range(len(patient_df)):
                     min(face.right(), frame.shape[1]),
                     min(face.bottom(), frame.shape[0]),
                 )
-                print(frame_count)
+                # print(frame_count)
                 print("All values: left, right, top, bottom", left, right, top, bottom)
                 break
             break
 
         old_left, old_top, old_right, old_bottom = left - 100, top - 100, right + 100, bottom + 100
+        # frame_count = 0
         while True:
-            print(frame_count)
+            # frame_count += 1
+            # current_frame = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
+            # print(f"Current Frame: {current_frame}")
+            # print(frame_count)
             ret, frame = cap.read()
             if not ret:
                 break
@@ -141,7 +137,6 @@ for val in range(len(patient_df)):
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
 
-            frame_count += 1
             # Write the cropped face region to the ImageWriter
             #
 
